@@ -9,7 +9,7 @@ from lancedb.pydantic import LanceModel
 import pyarrow as pa
 
 from ..api import VectorDB
-from .config import LanceDBConfig
+from .config import LanceDBConfig, LanceDBIndexConfig, LanceDBIndexType
 
 log = logging.getLogger(__name__)
 
@@ -22,7 +22,7 @@ class LanceDB(VectorDB):
         self,
         dim: int,
         db_config: LanceDBConfig,
-        # db_case_config: LanceDBIndexConfig,
+        db_case_config: LanceDBIndexConfig,
         collection_name: str = "vector_bench_test",
         drop_old: bool = False,
         **kwargs,
@@ -30,7 +30,7 @@ class LanceDB(VectorDB):
         """Initialize wrapper around the LanceDB vector database."""
         self.name = "LanceDB"
         self.db_config = db_config
-        # self.case_config = db_case_config
+        self.case_config = db_case_config
         self.table_name = collection_name
         self.dim = dim
         self.uri = db_config['uri']  # Store the URI instead of connection
@@ -94,5 +94,10 @@ class LanceDB(VectorDB):
         return [int(result["id"]) for result in results]
 
     def optimize(self, data_size: int | None = None):
-        if self.table:
-            self.table.optimize()
+        if self.table and hasattr(self, 'case_config'):
+            if self.case_config.index != LanceDBIndexType.NONE:
+                log.info(f"Creating index for LanceDB table ({self.table_name})")
+                self.table.create_index(**self.case_config.index_param())
+                # Better recall with IVF_PQ (though still bad).
+                # But breaks HNSW: https://github.com/lancedb/lancedb/issues/2369
+                self.table.optimize()

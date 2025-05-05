@@ -96,6 +96,10 @@ class CaseConfigParamType(Enum):
     maxNumPrefetchDatasets = "max_num_prefetch_datasets"
     storage_engine = "storage_engine"
     max_cache_size = "max_cache_size"
+    metric_type = "metric_type"
+    num_partitions = "num_partitions"
+    num_sub_vectors = "num_sub_vectors"
+    sample_rate = "sample_rate"
 
     # mongodb params
     mongodb_quantization_type = "quantization"
