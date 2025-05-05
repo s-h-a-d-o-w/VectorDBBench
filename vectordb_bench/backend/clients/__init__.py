@@ -393,6 +393,11 @@ class DB(Enum):
 
             return VespaHNSWConfig
 
+        if self == DB.LanceDB:
+            from .lancedb.config import _lancedb_case_config
+
+            return _lancedb_case_config.get(index_type)
+
         # DB.Pinecone, DB.Chroma, DB.Redis
         return EmptyDBCaseConfig
 
